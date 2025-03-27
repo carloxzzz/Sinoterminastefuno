@@ -50,7 +50,7 @@ else:
 
 ######## 1.-Ejercicio
 
-st.subheader(f"Métricas de Rendimiento: {stock_seleccionado}")
+st.subheader(f"Métricas de Rendimiento: {ticker_manual}")
     
 rendimiento_medio = df_rendimientos.mean()
 Kurtosis = kurtosis(df_rendimientos)

@@ -12,20 +12,21 @@ st.title("Calculo de Value-At-Risk y de Expected Shortfall.")
 
 
 @st.cache_data
-def obtener_datos(stocks):
-    df = yf.download(stocks, period="1y")['Close']
-    return df
+def obtener_datos(stock):
+    try:
+        df = yf.download(stock, period="1y")['Close']
+        if df.empty:
+            return None
+        return df
+    except Exception:
+        return None
 
 @st.cache_data
 def calcular_rendimientos(df):
     return df.pct_change().dropna()
-
 # Lista de acciones de ejemplo
 stocks_lista = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN']
-
-with st.spinner("Descargando datos..."):
-    df_precios = obtener_datos(stocks_lista)
-    df_rendimientos = calcular_rendimientos(df_precios)
+    
 
 #######################################---FRONTEND---##################################################
 
@@ -33,17 +34,27 @@ st.header("Selección de Acción")
 
 st.text("Selecciona una acción de la lista ya que apartir de ella se calculara todo lo que se indica en cada ejercicio")
 
-stock_seleccionado = st.selectbox("Selecciona una acción", stocks_lista)
+# Meter el ticker de la acción
+ticker_manual = st.text_input("Ticker de la acción:", "").strip().upper()
+if ticker_manual:
+    with st.spinner(f"Descargando datos de {ticker_manual}..."):
+        df_precios = obtener_datos(ticker_manual)
+
+    if df_precios is not None:
+        df_rendimientos = calcular_rendimientos(df_precios)
+        st.success(f"Datos descargados correctamente para {ticker_manual}.")
+    else:
+        st.error("Error al obtener datos. Verifica que el ticker sea correcto.")
+else:
+    st.warning("Por favor, ingresa un ticker para continuar.")
 
 ######## 1.-Ejercicio
 
-
-
 st.subheader(f"Métricas de Rendimiento: {stock_seleccionado}")
     
-rendimiento_medio = df_rendimientos[stock_seleccionado].mean()
-Kurtosis = kurtosis(df_rendimientos[stock_seleccionado])
-skew = skew(df_rendimientos[stock_seleccionado])
+rendimiento_medio = df_rendimientos.mean()
+Kurtosis = kurtosis(df_rendimientos)
+skew = skew(df_rendimientos)
     
 col1, col2, col3= st.columns(3)
 col1.metric("Rendimiento Medio Diario", f"{rendimiento_medio:.4%}")

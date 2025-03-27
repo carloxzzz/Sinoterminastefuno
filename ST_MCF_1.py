@@ -10,53 +10,43 @@ st.title("Calculo de Value-At-Risk y de Expected Shortfall.")
 
 #######################################---BACKEND---##################################################
 
-
 @st.cache_data
 def obtener_datos(stock):
-    try:
-        df = yf.download(stock, period="1y")['Close']
-        if df.empty:
-            return None
-        return df
-    except Exception:
-        return None
+    df = yf.download(stock, period="1y")['Close']
+    return df
 
 @st.cache_data
 def calcular_rendimientos(df):
     return df.pct_change().dropna()
-# Lista de acciones de ejemplo
-stocks_lista = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN']
-    
 
 #######################################---FRONTEND---##################################################
 
 st.header("Selección de Acción")
 
-st.text("Selecciona una acción de la lista ya que apartir de ella se calculara todo lo que se indica en cada ejercicio")
+st.text("Ingresa el símbolo de la acción para calcular métricas de rendimiento:")
 
-# Meter el ticker de la acción
-ticker_manual = st.text_input("Ticker de la acción:", "").strip().upper()
-if ticker_manual:
-    with st.spinner(f"Descargando datos de {ticker_manual}..."):
-        df_precios = obtener_datos(ticker_manual)
+# Entrada de usuario para cualquier acción
+stock_seleccionado = st.text_input("Símbolo de la acción", "AAPL").upper()
 
-    if df_precios is not None:
+if stock_seleccionado:
+    try:
+        df_precios = obtener_datos(stock_seleccionado)
         df_rendimientos = calcular_rendimientos(df_precios)
-        st.success(f"Datos descargados correctamente para {ticker_manual}.")
-    else:
-        st.error("Error al obtener datos. Verifica que el ticker sea correcto.")
-else:
-    st.warning("Por favor, ingresa un ticker para continuar.")
 
-######## 1.-Ejercicio
+        if not df_rendimientos.empty:
+            ######## 1.-Ejercicio
+            st.subheader(f"Métricas de Rendimiento: {stock_seleccionado}")
 
-st.subheader(f"Métricas de Rendimiento: {ticker_manual}")
-    
-rendimiento_medio = df_rendimientos.mean()
-Kurtosis = kurtosis(df_rendimientos)
-skew = skew(df_rendimientos)
-    
-col1, col2, col3= st.columns(3)
-col1.metric("Rendimiento Medio Diario", f"{rendimiento_medio:.4%}")
-col2.metric("Kurtosis", f"{Kurtosis:.4}")
-col3.metric("Skew", f"{skew:.2}")
+            rendimiento_medio = df_rendimientos.mean()
+            Kurtosis = kurtosis(df_rendimientos)
+            Skew = skew(df_rendimientos)
+
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Rendimiento Medio Diario", f"{rendimiento_medio:.4%}")
+            col2.metric("Kurtosis", f"{Kurtosis:.4}")
+            col3.metric("Skew", f"{Skew:.2}")
+
+        else:
+            st.error("No se pudieron obtener datos de rendimiento para la acción ingresada.")
+    except Exception as e:
+        st.error(f"Error al obtener los datos: {e}")

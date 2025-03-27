@@ -43,7 +43,7 @@ stock_seleccionado = st.selectbox("Selecciona una acción", stocks_lista)
 if stock_seleccionado:
     st.subheader(f"Métricas de Rendimiento: {stock_seleccionado}")
     
-    rendimiento_medio = df_rendimientos[stock_seleccionado].mean()
+    rendimiento_medio = df_rendimientos[stock_seleccionado].dropna().mean()
     Kurtosis = kurtosis(df_rendimientos[stock_seleccionado])
     skew = skew(df_rendimientos[stock_seleccionado])
     

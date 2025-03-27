@@ -8,12 +8,12 @@ from scipy.stats import kurtosis, skew, shapiro ,norm
 
 st.title("Calculo de Value-At-Risk y de Expected Shortfall.")
 
-#######################################---BACKEND---##################################################
+######################################---BACKEND---##################################################
 
 @st.cache_data
 def obtener_datos(stock):
     df = yf.download(stock, period="1y")['Close']
-    return df
+    return df.to_frame(name=stock)  # Convertimos a DataFrame con nombre de columna explícito
 
 @st.cache_data
 def calcular_rendimientos(df):
@@ -37,9 +37,9 @@ if stock_seleccionado:
             ######## 1.-Ejercicio
             st.subheader(f"Métricas de Rendimiento: {stock_seleccionado}")
 
-            rendimiento_medio = df_rendimientos.mean()
-            Kurtosis = kurtosis(df_rendimientos)
-            Skew = skew(df_rendimientos)
+            rendimiento_medio = df_rendimientos.mean().iloc[0]  # Extraemos el valor numérico
+            Kurtosis = kurtosis(df_rendimientos).iloc[0]
+            Skew = skew(df_rendimientos).iloc[0]
 
             col1, col2, col3 = st.columns(3)
             col1.metric("Rendimiento Medio Diario", f"{rendimiento_medio:.4%}")

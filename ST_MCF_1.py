@@ -22,6 +22,12 @@ def calcular_rendimientos(df):
 # Lista de acciones de ejemplo
 stocks_lista = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN']
 
+
+
+st.header("Selección de Acción")
+
+st.text("Selecciona una acción de la lista ya que apartir de ella se calculara todo lo que se indica en cada ejercicio")
+
 stock_seleccionado = st.selectbox("Selecciona una acción", stocks_lista)
 
 ######## 1.-Ejercicio

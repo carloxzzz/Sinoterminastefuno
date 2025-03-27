@@ -8,6 +8,24 @@ from scipy.stats import kurtosis, skew, shapiro ,norm
 
 st.title("Calculo de Value-At-Risk y de Expected Shortfall.")
 
+#########################################################################################
+
+@st.cache_data
+def obtener_datos(stocks):
+    df = yf.download(stocks, period="1y")['Close']
+    return df
+
+@st.cache_data
+def calcular_rendimientos(df):
+    return df.pct_change().dropna()
+
+# Lista de acciones de ejemplo
+stocks_lista = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN']
+
+stock_seleccionado = st.selectbox("Selecciona una acción", stocks_lista)
+
+######## 1.-Ejercicio
+
 st.header("1.-Ejercicio")
 
 st.subheader("1.1.-Descarga y carga de datos")

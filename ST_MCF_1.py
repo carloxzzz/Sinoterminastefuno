@@ -103,7 +103,15 @@ if stock_seleccionado:
     st.subheader("Resultados del Value-at-Risk (VaR) y Expected Shortfall (ES)")
     #Mostramos el dataframe en pantalla de manera bonita
     st.dataframe(
-    df_resultados.set_index("Alpha").style.format("{:.4%}").background_gradient(
-        cmap="coolwarm", subset=["hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
-        )
+    df_resultados.set_index("Alpha").style.format("{:.4%}")
+    .applymap(lambda _: "background-color: #FFDDC1", subset=["hVaR"])  # Color durazno claro
+    .applymap(lambda _: "background-color: #C1E1FF", subset=["ES_hist"])  # Color azul claro
+    .applymap(lambda _: "background-color: #B5EAD7", subset=["VaR_Norm"])  # Color verde menta
+    .applymap(lambda _: "background-color: #FFB3BA", subset=["ES_Norm"])  # Color rosa claro
+    .applymap(lambda _: "background-color: #FFDAC1", subset=["VaR_t"])  # Color naranja claro
+    .applymap(lambda _: "background-color: #E2F0CB", subset=["ES_t"])  # Color verde pastel
+    .applymap(lambda _: "background-color: #D4A5A5", subset=["VaR_MC"])  # Color rojo suave
+    .applymap(lambda _: "background-color: #CBAACB", subset=["ES_MC"])  # Color lila claro
+    )
+
     st.bar_chart(df_resultados.set_index("Alpha").T)

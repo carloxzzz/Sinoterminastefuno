@@ -4,7 +4,7 @@ import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from scipy.stats import kurtosis, skew, shapiro ,norm
+from scipy.stats import kurtosis, skew, shapiro ,norm, t
 
 
 st.cache_data.clear()
@@ -61,14 +61,39 @@ if stock_seleccionado:
     col2.metric("Kurtosis", f"{Kurtosis:.4}")
     col3.metric("Skew", f"{skew:.2}")
 
-        # Gráfico de rendimientos diarios
-    st.subheader(f"Gráfico de Rendimientos: {stock_seleccionado}")
-    fig, ax = plt.subplots(figsize=(13, 5))
-    ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado], label=stock_seleccionado)
-    ax.axhline(y=0, color='r', linestyle='--', alpha=0.7)
-    ax.legend()
-    ax.set_title(f"Rendimientos de {stock_seleccionado}")
-    ax.set_xlabel("Fecha")
-    ax.set_ylabel("Rendimiento Diario")
-    st.pyplot(fig)
+    #Calculo de Value-At-Risk y de Expected Shortfall (historico)
+
+    std_dev = np.std(df_rendimientos[stock_seleccionado])
+
+    # Definir niveles de confianza
+    alphas = [0.95, 0.975, 0.99]
+    resultados = []
+    df_size = df_rendimientos[stock_seleccionado].size
+    df_t = df_size - 1  # Grados de libertad para t-Student
     
+    for alpha in alphas:
+        # VaR y ES históricos
+        hVaR = df_rendimientos[stock_seleccionado].quantile(1 - alpha)
+        ES_hist = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= hVaR].mean()
+        
+        # VaR y ES paramétrico normal
+        VaR_norm = norm.ppf(1 - alpha, rendimiento_medio, std_dev)
+        ES_norm = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_norm].mean()
+        
+        # VaR y ES paramétrico t-Student
+        t_ppf = t.ppf(1 - alpha, df_t)
+        VaR_t = rendimiento_medio + std_dev * t_ppf * np.sqrt((df_t - 2) / df_t)
+        ES_t = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_t].mean()
+        
+        # VaR y ES Monte Carlo
+        simulaciones = np.random.normal(rendimiento_medio, std_dev, 10000)
+        VaR_mc = np.percentile(simulaciones, (1 - alpha) * 100)
+        ES_mc = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_mc].mean()
+        
+        resultados.append([alpha, hVaR, ES_hist, VaR_norm, ES_norm, VaR_t, ES_t, VaR_mc, ES_mc])
+    
+    # Crear DataFrame con resultados
+    df_resultados = pd.DataFrame(resultados, columns=["Alpha", "hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
+    
+    st.subheader("Resultados del Value-at-Risk (VaR) y Expected Shortfall (ES)")
+    st.dataframe(df_resultados)

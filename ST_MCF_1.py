@@ -5,6 +5,8 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 from scipy.stats import kurtosis, skew, shapiro ,norm, t
+import altair as alt
+
 
 
 st.cache_data.clear()
@@ -101,5 +103,18 @@ if stock_seleccionado:
     st.subheader("Resultados del Value-at-Risk (VaR) y Expected Shortfall (ES)")
     st.dataframe(df_resultados.style.format("{:.4%}").background_gradient(cmap="coolwarm"))
     st.bar_chart(df_resultados.set_index("Alpha")[["hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"]])
+
+    # Convertir DataFrame a formato largo
+    df_melted = df_resultados.melt(id_vars=["Alpha"], var_name="Métrica", value_name="Valor")
+
+    # Crear histograma
+    histograma = alt.Chart(df_melted).mark_bar().encode(
+        x=alt.X("Valor:Q", bin=alt.Bin(maxbins=20)),  # Se agrupan los valores en bins
+        y="count()",
+        color="Métrica:N",  # Diferenciamos cada métrica por color
+        tooltip=["Métrica", "Valor"]
+    ).properties(title="Histograma de VaR y ES")
+
+    st.altair_chart(histograma, use_container_width=True)
 
 

@@ -23,9 +23,8 @@ def calcular_rendimientos(df):
     return df.pct_change().dropna()
 
 # Lista de acciones de ejemplo
-url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-df = pd.read_html(url, header=0)[0]  # Extrae la tabla de Wikipedia
-stocks_lista = df['Symbol'].tolist()
+
+stocks_lista = ["AAPL", "MSFT", "GOOGL"]
 
 with st.spinner("Descargando datos..."):
     df_precios = obtener_datos(stocks_lista)

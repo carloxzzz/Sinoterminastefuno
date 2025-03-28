@@ -114,5 +114,6 @@ if stock_seleccionado:
     .applymap(lambda _: "background-color: #D4A5A5; color: black;", subset=["VaR_MC"])  # Rojo 
     .applymap(lambda _: "background-color: #CBAACB; color: black;", subset=["ES_MC"])  # Lila 
     )
-
+    #Gráfico de barras para comparar los resultados
+    st.subheader("Gráfico de comparación de VaR y ES")
     st.bar_chart(df_resultados.set_index("Alpha").T)

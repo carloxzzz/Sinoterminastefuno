@@ -95,8 +95,15 @@ if stock_seleccionado:
         
         resultados.append([alpha, hVaR, ES_hist, VaR_norm, ES_norm, VaR_t, ES_t, VaR_mc, ES_mc])
     
-    # Crear DataFrame con resultados
+    # Crear DataFrame que contiene el VaR y ES para cada nivel de confianza
     df_resultados = pd.DataFrame(resultados, columns=["Alpha", "hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
-    
+    #Basicamente mostramos en patalla el dataframe antes creado
     st.subheader("Resultados del Value-at-Risk (VaR) y Expected Shortfall (ES)")
     st.dataframe(df_resultados.style.format("{:.4%}"))
+    st.dataframe(df_resultados.style.format("{:.4%}").background_gradient(cmap="coolwarm"))
+    st.dataframe(df_resultados.style.format("{:.4%}")
+    .highlight_max(axis=0, color="lightgreen")
+    .highlight_min(axis=0, color="salmon"))
+    st.bar_chart(df_resultados.set_index("Alpha")[["hVaR", "ES_hist", "VaR_Norm", "ES_Norm"]])
+
+

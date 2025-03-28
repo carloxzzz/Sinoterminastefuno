@@ -12,7 +12,6 @@ st.title("Calculo de Value-At-Risk y de Expected Shortfall.")
 
 
 st.title("Visualización de Rendimientos de Acciones")
-st.header("Streamlit clase 1 ")
 # st.write('hola')
 @st.cache_data
 def obtener_datos(stocks):

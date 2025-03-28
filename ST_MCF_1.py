@@ -103,7 +103,7 @@ if stock_seleccionado:
     st.subheader("Resultados del Value-at-Risk (VaR) y Expected Shortfall (ES)")
     #Mostramos el dataframe en pantalla de manera bonita
     st.dataframe(
-    df_resultados.style.format("{:.4%}").background_gradient(
+    df_resultados.set_index("Alpha").style.format("{:.4%}").background_gradient(
         cmap="coolwarm", subset=["hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
         )
     st.bar_chart(df_resultados.set_index("Alpha").T)

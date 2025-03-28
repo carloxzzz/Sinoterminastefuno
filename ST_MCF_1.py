@@ -104,14 +104,14 @@ if stock_seleccionado:
     #Mostramos el dataframe en pantalla de manera bonita
     st.dataframe(
     df_resultados.set_index("Alpha").style.format("{:.4%}")
-    .applymap(lambda _: "background-color: #FFDDC1", subset=["hVaR"])  # Color durazno claro
-    .applymap(lambda _: "background-color: #C1E1FF", subset=["ES_hist"])  # Color azul claro
-    .applymap(lambda _: "background-color: #B5EAD7", subset=["VaR_Norm"])  # Color verde menta
-    .applymap(lambda _: "background-color: #FFB3BA", subset=["ES_Norm"])  # Color rosa claro
-    .applymap(lambda _: "background-color: #FFDAC1", subset=["VaR_t"])  # Color naranja claro
-    .applymap(lambda _: "background-color: #E2F0CB", subset=["ES_t"])  # Color verde pastel
-    .applymap(lambda _: "background-color: #D4A5A5", subset=["VaR_MC"])  # Color rojo suave
-    .applymap(lambda _: "background-color: #CBAACB", subset=["ES_MC"])  # Color lila claro
+    .applymap(lambda _: "background-color: #FFDDC1; color: black;", subset=["hVaR"])  # Durazno claro
+    .applymap(lambda _: "background-color: #C1E1FF; color: black;", subset=["ES_hist"])  # Azul claro
+    .applymap(lambda _: "background-color: #B5EAD7; color: black;", subset=["VaR_Norm"])  # Verde menta
+    .applymap(lambda _: "background-color: #FFB3BA; color: black;", subset=["ES_Norm"])  # Rosa claro
+    .applymap(lambda _: "background-color: #FFDAC1; color: black;", subset=["VaR_t"])  # Naranja claro
+    .applymap(lambda _: "background-color: #E2F0CB; color: black;", subset=["ES_t"])  # Verde pastel
+    .applymap(lambda _: "background-color: #D4A5A5; color: black;", subset=["VaR_MC"])  # Rojo suave
+    .applymap(lambda _: "background-color: #CBAACB; color: black;", subset=["ES_MC"])  # Lila claro
     )
 
     st.bar_chart(df_resultados.set_index("Alpha").T)

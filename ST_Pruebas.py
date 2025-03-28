@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 from scipy.stats import kurtosis, skew, shapiro ,norm
 
+
+st.cache_data.clear()
+
 st.title("Visualización de Rendimientos de Acciones")
 st.header("Streamlit clase 1 ")
 # st.write('hola')
@@ -25,6 +28,8 @@ with st.spinner("Descargando datos..."):
     df_precios = obtener_datos(stocks_lista)
     df_rendimientos = calcular_rendimientos(df_precios)
 
+    print(df_rendimientos)
+
 # Selector de acción
 stock_seleccionado = st.selectbox("Selecciona una acción", stocks_lista)
 
@@ -32,6 +37,7 @@ if stock_seleccionado:
     st.subheader(f"Métricas de Rendimiento: {stock_seleccionado}")
     
     rendimiento_medio = df_rendimientos[stock_seleccionado].mean()
+    print(rendimiento_medio)
     Kurtosis = kurtosis(df_rendimientos[stock_seleccionado])
     skew = skew(df_rendimientos[stock_seleccionado])
     
@@ -136,3 +142,4 @@ if stock_seleccionado:
 
     # Mostrar la figura en Streamlit
     st.pyplot(fig)
+

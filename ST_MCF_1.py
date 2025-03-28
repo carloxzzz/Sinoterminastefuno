@@ -99,11 +99,7 @@ if stock_seleccionado:
     df_resultados = pd.DataFrame(resultados, columns=["Alpha", "hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
     #Basicamente mostramos en patalla el dataframe antes creado
     st.subheader("Resultados del Value-at-Risk (VaR) y Expected Shortfall (ES)")
-    st.dataframe(df_resultados.style.format("{:.4%}"))
     st.dataframe(df_resultados.style.format("{:.4%}").background_gradient(cmap="coolwarm"))
-    st.dataframe(df_resultados.style.format("{:.4%}")
-    .highlight_max(axis=0, color="lightgreen")
-    .highlight_min(axis=0, color="salmon"))
-    st.bar_chart(df_resultados.set_index("Alpha")[["hVaR", "ES_hist", "VaR_Norm", "ES_Norm"]])
+    st.bar_chart(df_resultados.set_index("Alpha")[["hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"]])
 
 

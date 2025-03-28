@@ -116,4 +116,5 @@ if stock_seleccionado:
     )
     #Gráfico de barras para comparar los resultados
     st.subheader("Gráfico de comparación de VaR y ES")
+    st.text("Este gráfico muestra la comparación de los diferentes métodos de cálculo de VaR y ES")
     st.bar_chart(df_resultados.set_index("Alpha").T)

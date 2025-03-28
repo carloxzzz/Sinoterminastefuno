@@ -100,18 +100,19 @@ if stock_seleccionado:
     # Crear DataFrame que contiene el VaR y ES para cada nivel de confianza
     df_resultados = pd.DataFrame(resultados, columns=["Alpha", "hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
     #Basicamente mostramos en patalla el dataframe antes creado
-    st.subheader("Resultados del Value-at-Risk (VaR) y Expected Shortfall (ES)")
+    st.subheader("Tabla comparativa de VaR y ES")
+    st.text("Esta tabla muestra los resultados de los diferentes metodos de calculo de VaR y ES")
     #Mostramos el dataframe en pantalla de manera bonita
     st.dataframe(
     df_resultados.set_index("Alpha").style.format("{:.4%}")
-    .applymap(lambda _: "background-color: #FFDDC1; color: black;", subset=["hVaR"])  # Durazno claro
-    .applymap(lambda _: "background-color: #C1E1FF; color: black;", subset=["ES_hist"])  # Azul claro
-    .applymap(lambda _: "background-color: #B5EAD7; color: black;", subset=["VaR_Norm"])  # Verde menta
-    .applymap(lambda _: "background-color: #FFB3BA; color: black;", subset=["ES_Norm"])  # Rosa claro
-    .applymap(lambda _: "background-color: #FFDAC1; color: black;", subset=["VaR_t"])  # Naranja claro
-    .applymap(lambda _: "background-color: #E2F0CB; color: black;", subset=["ES_t"])  # Verde pastel
-    .applymap(lambda _: "background-color: #D4A5A5; color: black;", subset=["VaR_MC"])  # Rojo suave
-    .applymap(lambda _: "background-color: #CBAACB; color: black;", subset=["ES_MC"])  # Lila claro
+    .applymap(lambda _: "background-color: #FFDDC1; color: black;", subset=["hVaR"])  # Durazno 
+    .applymap(lambda _: "background-color: #C1E1FF; color: black;", subset=["ES_hist"])  # Azul 
+    .applymap(lambda _: "background-color: #B5EAD7; color: black;", subset=["VaR_Norm"])  # Verde 
+    .applymap(lambda _: "background-color: #FFB3BA; color: black;", subset=["ES_Norm"])  # Rosa 
+    .applymap(lambda _: "background-color: #FFDAC1; color: black;", subset=["VaR_t"])  # Naranja 
+    .applymap(lambda _: "background-color: #E2F0CB; color: black;", subset=["ES_t"])  # Verde 
+    .applymap(lambda _: "background-color: #D4A5A5; color: black;", subset=["VaR_MC"])  # Rojo 
+    .applymap(lambda _: "background-color: #CBAACB; color: black;", subset=["ES_MC"])  # Lila 
     )
 
     st.bar_chart(df_resultados.set_index("Alpha").T)

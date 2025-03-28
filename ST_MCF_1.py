@@ -99,4 +99,4 @@ if stock_seleccionado:
     df_resultados = pd.DataFrame(resultados, columns=["Alpha", "hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
     
     st.subheader("Resultados del Value-at-Risk (VaR) y Expected Shortfall (ES)")
-    st.dataframe(df_resultados)
+    st.dataframe(df_resultados.style.format("{:.4%}"))

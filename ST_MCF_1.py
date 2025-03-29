@@ -28,18 +28,6 @@ def obtener_datos(stocks):
 def calcular_rendimientos(df):
     return df.pct_change().dropna()
 
-
-    #for i in range(len(returns) - window):
-        #window_data = returns[i:i + window]
-        #mean, std = np.mean(window_data), np.std(window_data)
-        
-
-# Lista de acciones de ejemplo
-#url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-#df = pd.read_html(url, header=0)[0]  # Extrae la tabla de Wikipedia
-#stocks_lista = df['Symbol'].tolist()
-#stocks_lista = [ticker.replace('.', '-') for ticker in df['Symbol'].tolist()]
-
 # Lista de acciones de ejemplo
 stocks_lista = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN']
 
@@ -104,10 +92,14 @@ if stock_seleccionado:
         resultados.append([alpha, hVaR, ES_hist, VaR_norm, ES_norm, VaR_t, ES_t, VaR_mc, ES_mc])
     
     # Crear DataFrame que contiene el VaR y ES para cada nivel de confianza
+
     df_resultados = pd.DataFrame(resultados, columns=["Alpha", "hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
+
     #Basicamente mostramos en patalla el dataframe antes creado
+
     st.subheader("Tabla comparativa de VaR y ES")
     st.text("Esta tabla muestra los resultados de los diferentes metodos de calculo de VaR y ES")
+
     #Mostramos el dataframe en pantalla de manera bonita
     st.dataframe(
     df_resultados.set_index("Alpha").style.format("{:.4%}")
@@ -124,3 +116,31 @@ if stock_seleccionado:
     st.subheader("Gráfico de comparación de VaR y ES")
     st.text("Este gráfico muestra la comparación de los diferentes métodos de cálculo de VaR y ES")
     st.bar_chart(df_resultados.set_index("Alpha").T)
+
+    
+    ##################################################################################################
+    
+    #Calculo de VaR y ES con Rolling Window
+
+    st.subheader(f"Cálculo de VaR y ES con Rolling Window para {stock_seleccionado}")
+    
+    ventana = 252  # Rolling window de 252 días
+    alphas2 = [0.95, 0.99]
+    
+    rolling_var = pd.DataFrame(index=df_rendimientos[stock_seleccionado].index)
+    rolling_es = pd.DataFrame(index=df_rendimientos[stock_seleccionado].index)
+    
+    for alpha in alphas2:
+        var_historico = df_rendimientos[stock_seleccionado].rolling(ventana).quantile(1 - alpha)
+        es_historico = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= var_historico].rolling(ventana).mean()
+        
+        rolling_var[f"VaR {int(alpha*100)}% Hist"] = var_historico
+        rolling_es[f"ES {int(alpha*100)}% Hist"] = es_historico
+        
+        std_rolling = df_rendimientos[stock_seleccionado].rolling(ventana).std()
+        mean_rolling = df_rendimientos[stock_seleccionado].rolling(ventana).mean()
+        var_param = mean_rolling + norm.ppf(1 - alpha) * std_rolling
+        es_param = mean_rolling - std_rolling * norm.pdf(norm.ppf(alpha)) / (1 - alpha)
+        
+        rolling_var[f"VaR {int(alpha*100)}% Norm"] = var_param
+        rolling_es[f"ES {int(alpha*100)}% Norm"] = es_param

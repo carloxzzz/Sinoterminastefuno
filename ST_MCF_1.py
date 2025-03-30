@@ -124,20 +124,41 @@ if stock_seleccionado:
 
     st.subheader(f"Cálculo de VaR y ES con Rolling Window para {stock_seleccionado}")
     
-    ventana = 252  # Rolling window de 252 días
+    # Parámetros
+    window_size = 252  # Ventana de 252 días
     alphas2 = [0.95, 0.99]
-    
-    rolling_var = pd.DataFrame(index=df_rendimientos[stock_seleccionado].index)
-    rolling_es = pd.DataFrame(index=df_rendimientos[stock_seleccionado].index)
-    
-    for alpha in alphas2:
-        hVaR_R = df_rendimientos[stock_seleccionado].rolling(ventana).quantile(1 - alpha)
-        ES_HR = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= hVaR_R].rolling(ventana).mean()
-        
-        std_rolling = df_rendimientos[stock_seleccionado].rolling(ventana).std()
-        mean_rolling = df_rendimientos[stock_seleccionado].rolling(ventana).mean()
 
-        var_param = mean_rolling + norm.ppf(1 - alpha) * std_rolling
-        es_param = mean_rolling - std_rolling * norm.pdf(norm.ppf(alpha)) / (1 - alpha)
-
+    VaR_rolling = {alpha: [] for alpha in alphas2}
+    ES_rolling = {alpha: [] for alpha in alphas2}
+    fechas = df_rendimientos.index[window_size:]
+    
+    
+    # Cálculo de VaR y ES con rolling window
+    for i in range(len(fechas)):
+        ventana = df_rendimientos.iloc[i:i+window_size]
+        Media_R = ventana.mean()
+        Std_R = ventana.std()
         
+        for alpha in alphas2:
+            var_param = norm.ppf(1 - alpha, Media_R, Std_R)
+            es_param = ventana[ventana <= var_param].mean()
+            
+            VaR_rolling[alpha].append(var_param)
+            ES_rolling[alpha].append(es_param)
+
+
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(fechas, df_rendimientos.iloc[window_size:], label='Retornos', color='blue', alpha=0.5)
+    ax.plot(fechas, VaR_rolling[0.95], label='VaR 95%', color='red')
+    ax.plot(fechas, ES_rolling[0.95], label='ES 95%', color='darkred', linestyle='dashed')
+    ax.plot(fechas, VaR_rolling[0.99], label='VaR 99%', color='green')
+    ax.plot(fechas, ES_rolling[0.99], label='ES 99%', color='darkgreen', linestyle='dashed')
+    
+    ax.set_title(f'VaR y ES con Rolling Window ({stock_seleccionado})')
+    ax.set_xlabel('Fecha')
+    ax.set_ylabel('Retornos')
+    ax.legend()
+    ax.grid()
+    
+    st.pyplot(fig)

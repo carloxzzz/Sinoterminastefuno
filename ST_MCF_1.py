@@ -21,7 +21,7 @@ st.title("Visualización de Rendimientos de Acciones")
 # st.write('hola')
 @st.cache_data
 def obtener_datos(stocks):
-    df = yf.download(stocks, period="1y")['Close']
+    df = yf.download(stocks, period="15y")['Close']
     return df
 
 @st.cache_data
@@ -131,16 +131,13 @@ if stock_seleccionado:
     rolling_es = pd.DataFrame(index=df_rendimientos[stock_seleccionado].index)
     
     for alpha in alphas2:
-        var_historico = df_rendimientos[stock_seleccionado].rolling(ventana).quantile(1 - alpha)
-        es_historico = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= var_historico].rolling(ventana).mean()
-        
-        rolling_var[f"VaR {int(alpha*100)}% Hist"] = var_historico
-        rolling_es[f"ES {int(alpha*100)}% Hist"] = es_historico
+        hVaR_R = df_rendimientos[stock_seleccionado].rolling(ventana).quantile(1 - alpha)
+        ES_HR = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= hVaR_R].rolling(ventana).mean()
         
         std_rolling = df_rendimientos[stock_seleccionado].rolling(ventana).std()
         mean_rolling = df_rendimientos[stock_seleccionado].rolling(ventana).mean()
+
         var_param = mean_rolling + norm.ppf(1 - alpha) * std_rolling
         es_param = mean_rolling - std_rolling * norm.pdf(norm.ppf(alpha)) / (1 - alpha)
+
         
-        rolling_var[f"VaR {int(alpha*100)}% Norm"] = var_param
-        rolling_es[f"ES {int(alpha*100)}% Norm"] = es_param

@@ -135,21 +135,22 @@ if stock_seleccionado:
     var_es_rolling_df = pd.DataFrame(index=df_rendimientos.index)
 
     for alpha in alphas2:
-        col_hVaR = f'{int(alpha * 100)}% VaR Historico'
+        col_hVaR = f'{int(alpha * 100)}% VaR Historical'
         col_VaR_norm = f'{int(alpha * 100)}% VaR Normal'
-        col_ES_hist = f'{int(alpha * 100)}% ES Historico'
+        col_ES_hist = f'{int(alpha * 100)}% ES Historical'
         col_ES_norm = f'{int(alpha * 100)}% ES Normal'
         
         # Cálculo de VaR
         var_es_rolling_df[col_hVaR] = df_rendimientos[stock_seleccionado].rolling(window).quantile(1 - alpha)
-        var_es_rolling_df[col_VaR_norm] = norm.ppf(1 - alpha, rolling_mean, rolling_std)
+        var_es_rolling_df[col_VaR_norm] = rolling_mean + rolling_std * norm.ppf(1 - alpha)
 
         # Cálculo de ES Histórico
-        var_es_rolling_df[col_ES_hist] = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= df_rendimientos[stock_seleccionado].rolling(window).quantile(1 - alpha)].mean()
-        
+        var_es_rolling_df[col_ES_hist] = df_rendimientos[stock_seleccionado].rolling(window).apply(
+            lambda x: x[x <= x.quantile(1 - alpha)].mean(), raw=True
+        )
 
         # Cálculo de ES Normal
-        var_es_rolling_df[col_ES_norm] = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= rolling_mean + rolling_std * norm.ppf(1 - alpha)].mean()
+        var_es_rolling_df[col_ES_norm] = rolling_mean - rolling_std * (norm.pdf(norm.ppf(1 - alpha)) / (1 - alpha))
 
     # Eliminamos filas con valores NaN generados por la ventana móvil
     var_es_rolling_df.dropna(inplace=True)
@@ -158,20 +159,20 @@ if stock_seleccionado:
     plt.figure(figsize=(14, 7))
 
     # Gráfica de rendimientos diarios (convertidos a porcentaje)
-    plt.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Retornos Diarios (%)', color='blue', alpha=0.5)
+    plt.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Daily Returns (%)', color='blue', alpha=0.5)
 
     # Graficamos el VaR al 95% rolling
-    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Historico'], label='95% Historico VaR', color='red', linestyle='dashed')
+    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Historical'], label='95% Historical VaR', color='red', linestyle='dashed')
     plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Normal'], label='95% Normal VaR', color='red')
 
     # Graficamos el ES al 95% rolling
-    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Historico'], label='95% Historico ES', color='purple', linestyle='dashed')
+    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Historical'], label='95% Historical ES', color='purple', linestyle='dashed')
     plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Normal'], label='95% Normal ES', color='purple')
 
     # Agregar título y etiquetas
-    plt.title('Retornos Diarios, VaR, and ES (95%) Rolling')
-    plt.xlabel('Fecha')
-    plt.ylabel('Cofianza (%)')
+    plt.title('Daily Returns, VaR, and ES (95%) Rolling')
+    plt.xlabel('Date')
+    plt.ylabel('Values (%)')
 
     # Mostrar leyenda
     plt.legend()

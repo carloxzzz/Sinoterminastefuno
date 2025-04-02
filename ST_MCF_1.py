@@ -127,42 +127,66 @@ if stock_seleccionado:
 
     st.subheader("Cálculo de VaR y ES con Rolling Window")
 
-    window = 252
-    alphas2 = [0.95, 0.99]
 
-    # Cálculo de estadísticas necesarias
+    alphas2 = [0.95, 0.99]
+    window = 252  # Tamaño de la ventana móvil
+
+    # Cálculo de estadísticas para VaR y ES rolling window
     rolling_mean = df_rendimientos[stock_seleccionado].rolling(window).mean()
     rolling_std = df_rendimientos[stock_seleccionado].rolling(window).std()
 
-    # DataFrame para almacenar resultados
+    # Diccionario para almacenar resultados de VaR y ES rolling
     vaR_rolling_df = pd.DataFrame(index=df_rendimientos.index)
+    es_rolling_df = pd.DataFrame(index=df_rendimientos.index)
+    hVaR_rolling_df = pd.DataFrame(index=df_rendimientos.index)
+    hES_rolling_df = pd.DataFrame(index=df_rendimientos.index)
 
     for alpha in alphas2:
-        col_hVaR = f'{int(alpha * 100)}% VaR Historical'
-        col_VaR_norm = f'{int(alpha * 100)}% VaR Normal'
+        # VaR histórico
+        hVaR_R = df_rendimientos[stock_seleccionado].rolling(window).quantile(1 - alpha)
         
-        # Cálculo de VaR
-        vaR_rolling_df[col_hVaR] = df_rendimientos[stock_seleccionado].rolling(window).quantile(1 - alpha)
-        vaR_rolling_df[col_VaR_norm] = rolling_mean + rolling_std * norm.ppf(1 - alpha)
+        # ES histórico
+        ES_hist_R = df_rendimientos[stock_seleccionado].rolling(window).apply(lambda x: pd.Series(x).loc[pd.Series(x) <= pd.Series(x).quantile(1 - alpha)].mean(), raw=True)
+        
+        # VaR paramétrico normal
+        VaR_norm_R = norm.ppf(1 - alpha, rolling_mean, rolling_std)
+        
+        # ES paramétrico normal
+        ES_norm_R = -rolling_mean + rolling_std * norm.pdf(norm.ppf(1 - alpha)) / (1 - alpha)
+        
+        # Almacenar resultados en DataFrame
+        vaR_rolling_df[f'{int(alpha * 100)}% VaR Rolling'] = VaR_norm_R
+        es_rolling_df[f'{int(alpha * 100)}% ES Rolling'] = ES_norm_R
+        hVaR_rolling_df[f'{int(alpha * 100)}% hVaR Rolling'] = hVaR_R
+        hES_rolling_df[f'{int(alpha * 100)}% hES Rolling'] = ES_hist_R
 
-    # Eliminamos filas con valores NaN generados por la ventana móvil
-    vaR_rolling_df.dropna(inplace=True)
-
-    # Graficamos
+    # Gráfica para VaR y ES paramétricos
     plt.figure(figsize=(14, 7))
-
-    # Gráfica de rendimientos diarios (convertidos a porcentaje)
-    plt.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Daily Returns (%)', color='blue', alpha=0.5)
-
-    # Graficamos el VaR al 95% rolling
-    plt.plot(vaR_rolling_df.index, vaR_rolling_df['95% VaR Historical'], label='95% Historical VaR', color='red', linestyle='dashed')
-    plt.plot(vaR_rolling_df.index, vaR_rolling_df['95% VaR Normal'], label='95% Normal VaR', color='red')
-
-    # Agregar título y etiquetas
-    plt.title('Daily Returns and 95% Rolling VaR')
+    plt.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, 
+            label='Daily Returns (%)', color='blue', alpha=0.5)
+    plt.plot(vaR_rolling_df.index, vaR_rolling_df['95% VaR Rolling'], 
+            label='95% Rolling VaR', color='red')
+    plt.plot(es_rolling_df.index, es_rolling_df['95% ES Rolling'], 
+            label='95% Rolling ES', color='green')
+    plt.title('Daily Returns, 95% Rolling VaR, and 95% Rolling ES')
     plt.xlabel('Date')
     plt.ylabel('Values (%)')
-
-    # Mostrar leyenda
     plt.legend()
+    plt.tight_layout()
     plt.show()
+
+    # Gráfica para VaR y ES históricos
+    plt.figure(figsize=(14, 7))
+    plt.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, 
+            label='Daily Returns (%)', color='blue', alpha=0.5)
+    plt.plot(hVaR_rolling_df.index, hVaR_rolling_df['95% hVaR Rolling'], 
+            label='95% Historical VaR', color='purple')
+    plt.plot(hES_rolling_df.index, hES_rolling_df['95% hES Rolling'], 
+            label='95% Historical ES', color='orange')
+    plt.title('Daily Returns, 95% Historical VaR, and 95% Historical ES')
+    plt.xlabel('Date')
+    plt.ylabel('Values (%)')
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+

@@ -28,6 +28,28 @@ def obtener_datos(stocks):
 def calcular_rendimientos(df):
     return df.pct_change().dropna()
 
+def var_es_historico(df_rendimientos, stock_seleccionado, alpha):
+    hVaR = df_rendimientos[stock_seleccionado].quantile(1 - alpha)
+    ES_hist = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= hVaR].mean()
+    return hVaR, ES_hist
+
+def var_es_parametrico_normal(rendimiento_medio, std_dev, alpha, df_rendimientos, stock_seleccionado):
+    VaR_norm = norm.ppf(1 - alpha, rendimiento_medio, std_dev)
+    ES_norm = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_norm].mean()
+    return VaR_norm, ES_norm
+
+def var_es_parametrico_t(rendimiento_medio, std_dev, df_t, alpha, df_rendimientos, stock_seleccionado):
+    t_ppf = t.ppf(1 - alpha, df_t)
+    VaR_t = rendimiento_medio + std_dev * t_ppf * np.sqrt((df_t - 2) / df_t)
+    ES_t = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_t].mean()
+    return VaR_t, ES_t
+
+def var_es_montecarlo(rendimiento_medio, std_dev, alpha, df_rendimientos, stock_seleccionado, num_sim=10000):
+    simulaciones = np.random.normal(rendimiento_medio, std_dev, num_sim)
+    VaR_mc = np.percentile(simulaciones, (1 - alpha) * 100)
+    ES_mc = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_mc].mean()
+    return VaR_mc, ES_mc
+
 # Lista de acciones de ejemplo
 stocks_lista = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN']
 
@@ -69,50 +91,31 @@ if stock_seleccionado:
     resultados = []
     df_size = df_rendimientos[stock_seleccionado].size
     df_t = df_size - 1  # Grados de libertad para t-Student
-    
+    # Calcular VaR y ES para cada nivel de confianza
     for alpha in alphas:
-        # VaR y ES históricos
-        hVaR = df_rendimientos[stock_seleccionado].quantile(1 - alpha)
-        ES_hist = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= hVaR].mean()
-        
-        # VaR y ES paramétrico normal
-        VaR_norm = norm.ppf(1 - alpha, rendimiento_medio, std_dev)
-        ES_norm = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_norm].mean()
-        
-        # VaR y ES paramétrico t-Student
-        t_ppf = t.ppf(1 - alpha, df_t)
-        VaR_t = rendimiento_medio + std_dev * t_ppf * np.sqrt((df_t - 2) / df_t)
-        ES_t = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_t].mean()
-        
-        # VaR y ES Monte Carlo
-        simulaciones = np.random.normal(rendimiento_medio, std_dev, 10000)
-        VaR_mc = np.percentile(simulaciones, (1 - alpha) * 100)
-        ES_mc = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaR_mc].mean()
+        hVaR, ES_hist = var_es_historico(df_rendimientos, stock_seleccionado, alpha)
+        VaR_norm, ES_norm = var_es_parametrico_normal(rendimiento_medio, std_dev, alpha, df_rendimientos, stock_seleccionado)
+        VaR_t, ES_t = var_es_parametrico_t(rendimiento_medio, std_dev, df_t, alpha, df_rendimientos, stock_seleccionado)
+        VaR_mc, ES_mc = var_es_montecarlo(rendimiento_medio, std_dev, alpha, df_rendimientos, stock_seleccionado)
         
         resultados.append([alpha, hVaR, ES_hist, VaR_norm, ES_norm, VaR_t, ES_t, VaR_mc, ES_mc])
-    
-    # Crear DataFrame que contiene el VaR y ES para cada nivel de confianza
 
     df_resultados = pd.DataFrame(resultados, columns=["Alpha", "hVaR", "ES_hist", "VaR_Norm", "ES_Norm", "VaR_t", "ES_t", "VaR_MC", "ES_MC"])
 
-    #Basicamente mostramos en patalla el dataframe antes creado
-
     st.subheader("Tabla comparativa de VaR y ES")
-    st.text("Esta tabla muestra los resultados de los diferentes metodos de calculo de VaR y ES")
-
-    #Mostramos el dataframe en pantalla de manera bonita
+    st.text("Esta tabla muestra los resultados de los diferentes métodos de cálculo de VaR y ES")
     st.dataframe(
-    df_resultados.set_index("Alpha").style.format("{:.4%}")
-    .applymap(lambda _: "background-color: #FFDDC1; color: black;", subset=["hVaR"])  # Durazno 
-    .applymap(lambda _: "background-color: #C1E1FF; color: black;", subset=["ES_hist"])  # Azul 
-    .applymap(lambda _: "background-color: #B5EAD7; color: black;", subset=["VaR_Norm"])  # Verde 
-    .applymap(lambda _: "background-color: #FFB3BA; color: black;", subset=["ES_Norm"])  # Rosa 
-    .applymap(lambda _: "background-color: #FFDAC1; color: black;", subset=["VaR_t"])  # Naranja 
-    .applymap(lambda _: "background-color: #E2F0CB; color: black;", subset=["ES_t"])  # Verde 
-    .applymap(lambda _: "background-color: #D4A5A5; color: black;", subset=["VaR_MC"])  # Rojo 
-    .applymap(lambda _: "background-color: #CBAACB; color: black;", subset=["ES_MC"])  # Lila 
+        df_resultados.set_index("Alpha").style.format("{:.4%}")
+        .applymap(lambda _: "background-color: #FFDDC1; color: black;", subset=["hVaR"])  # Durazno 
+        .applymap(lambda _: "background-color: #C1E1FF; color: black;", subset=["ES_hist"])  # Azul 
+        .applymap(lambda _: "background-color: #B5EAD7; color: black;", subset=["VaR_Norm"])  # Verde 
+        .applymap(lambda _: "background-color: #FFB3BA; color: black;", subset=["ES_Norm"])  # Rosa 
+        .applymap(lambda _: "background-color: #FFDAC1; color: black;", subset=["VaR_t"])  # Naranja 
+        .applymap(lambda _: "background-color: #E2F0CB; color: black;", subset=["ES_t"])  # Verde 
+        .applymap(lambda _: "background-color: #D4A5A5; color: black;", subset=["VaR_MC"])  # Rojo 
+        .applymap(lambda _: "background-color: #CBAACB; color: black;", subset=["ES_MC"])  # Lila 
     )
-    #Gráfico de barras para comparar los resultados
+
     st.subheader("Gráfico de comparación de VaR y ES")
     st.text("Este gráfico muestra la comparación de los diferentes métodos de cálculo de VaR y ES")
     st.bar_chart(df_resultados.set_index("Alpha").T)

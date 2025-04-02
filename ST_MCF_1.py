@@ -122,43 +122,58 @@ if stock_seleccionado:
     
     #Calculo de VaR y ES con Rolling Window
 
-    st.subheader(f"Cálculo de VaR y ES con Rolling Window para {stock_seleccionado}")
-    
-    # Parámetros
-    window_size = 252  # Ventana de 252 días
+    st.subheader("Cálculo de VaR y ES con Rolling Window")
+
+    window = 252
     alphas2 = [0.95, 0.99]
 
-    VaR_rolling = {alpha: [] for alpha in alphas2}
-    ES_rolling = {alpha: [] for alpha in alphas2}
-    fechas = df_rendimientos.index[window_size:]
-    
-    
-    # Cálculo de VaR y ES con rolling window
-    for i in range(len(fechas)):
-        ventana = df_rendimientos.iloc[i:i+window_size]
-        Media_R = ventana.mean()
-        Std_R = ventana.std()
+    # Cálculo de estadísticas necesarias
+    rolling_mean = df_rendimientos[stock_seleccionado].rolling(window).mean()
+    rolling_std = df_rendimientos[stock_seleccionado].rolling(window).std()
+
+    # DataFrame para almacenar resultados
+    var_es_rolling_df = pd.DataFrame(index=df_rendimientos.index)
+
+    for alpha in alphas2:
+        col_hVaR = f'{int(alpha * 100)}% VaR Historical'
+        col_VaR_norm = f'{int(alpha * 100)}% VaR Normal'
+        col_ES_hist = f'{int(alpha * 100)}% ES Historical'
+        col_ES_norm = f'{int(alpha * 100)}% ES Normal'
         
-        for alpha in alphas2:
-            var_param = norm.ppf(1 - alpha, Media_R, Std_R)
-            es_param = ventana[ventana <= var_param].mean()
-            
-            VaR_rolling[alpha].append(var_param)
-            ES_rolling[alpha].append(es_param)
+        # Cálculo de VaR
+        var_es_rolling_df[col_hVaR] = df_rendimientos[stock_seleccionado].rolling(window).quantile(1 - alpha)
+        var_es_rolling_df[col_VaR_norm] = rolling_mean + rolling_std * norm.ppf(1 - alpha)
 
+        # Cálculo de ES Histórico
+        var_es_rolling_df[col_ES_hist] = df_rendimientos[stock_seleccionado].rolling(window).apply(
+            lambda x: x[x <= x.quantile(1 - alpha)].mean(), raw=True
+        )
 
+        # Cálculo de ES Normal
+        var_es_rolling_df[col_ES_norm] = rolling_mean - rolling_std * (norm.pdf(norm.ppf(1 - alpha)) / (1 - alpha))
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(fechas, df_rendimientos.iloc[window_size:], label='Retornos', color='blue', alpha=0.5)
-    ax.plot(fechas, VaR_rolling[0.95], label='VaR 95%', color='red')
-    ax.plot(fechas, ES_rolling[0.95], label='ES 95%', color='darkred', linestyle='dashed')
-    ax.plot(fechas, VaR_rolling[0.99], label='VaR 99%', color='green')
-    ax.plot(fechas, ES_rolling[0.99], label='ES 99%', color='darkgreen', linestyle='dashed')
-    
-    ax.set_title(f'VaR y ES con Rolling Window ({stock_seleccionado})')
-    ax.set_xlabel('Fecha')
-    ax.set_ylabel('Retornos')
-    ax.legend()
-    ax.grid()
-    
-    st.pyplot(fig)
+    # Eliminamos filas con valores NaN generados por la ventana móvil
+    var_es_rolling_df.dropna(inplace=True)
+
+    # Graficamos
+    plt.figure(figsize=(14, 7))
+
+    # Gráfica de rendimientos diarios (convertidos a porcentaje)
+    plt.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Retornos Diarios (%)', color='blue', alpha=0.5)
+
+    # Graficamos el VaR al 95% rolling
+    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Historico'], label='95% Historico VaR', color='red', linestyle='dashed')
+    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Normal'], label='95% Normal VaR', color='red')
+
+    # Graficamos el ES al 95% rolling
+    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Historico'], label='95% Historico ES', color='purple', linestyle='dashed')
+    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Normal'], label='95% Normal ES', color='purple')
+
+    # Agregar título y etiquetas
+    plt.title('Retornos Diarios, VaR, and ES (95%) Rolling')
+    plt.xlabel('Fecha')
+    plt.ylabel('Cofianza (%)')
+
+    # Mostrar leyenda
+    plt.legend()
+    plt.show()

@@ -135,9 +135,9 @@ if stock_seleccionado:
     var_es_rolling_df = pd.DataFrame(index=df_rendimientos.index)
 
     for alpha in alphas2:
-        col_hVaR = f'{int(alpha * 100)}% VaR Historical'
+        col_hVaR = f'{int(alpha * 100)}% VaR Historico'
         col_VaR_norm = f'{int(alpha * 100)}% VaR Normal'
-        col_ES_hist = f'{int(alpha * 100)}% ES Historical'
+        col_ES_hist = f'{int(alpha * 100)}% ES Historico'
         col_ES_norm = f'{int(alpha * 100)}% ES Normal'
         
         # Cálculo de VaR
@@ -145,12 +145,11 @@ if stock_seleccionado:
         var_es_rolling_df[col_VaR_norm] = rolling_mean + rolling_std * norm.ppf(1 - alpha)
 
         # Cálculo de ES Histórico
-        var_es_rolling_df[col_ES_hist] = df_rendimientos[stock_seleccionado].rolling(window).apply(
-            lambda x: x[x <= x.quantile(1 - alpha)].mean(), raw=True
-        )
+        var_es_rolling_df[col_ES_hist] = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= df_rendimientos[stock_seleccionado].rolling(window).quantile(1 - alpha)].mean()
+        
 
         # Cálculo de ES Normal
-        var_es_rolling_df[col_ES_norm] = rolling_mean - rolling_std * (norm.pdf(norm.ppf(1 - alpha)) / (1 - alpha))
+        var_es_rolling_df[col_ES_norm] = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= rolling_mean + rolling_std * norm.ppf(1 - alpha)].mean()
 
     # Eliminamos filas con valores NaN generados por la ventana móvil
     var_es_rolling_df.dropna(inplace=True)

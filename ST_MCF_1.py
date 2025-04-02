@@ -146,8 +146,9 @@ if stock_seleccionado:
 
         # Cálculo de ES Histórico
         var_es_rolling_df[col_ES_hist] = df_rendimientos[stock_seleccionado].rolling(window).apply(
-            lambda x: x[x <= x.quantile(1 - alpha)].mean(), raw=True
+            lambda x: pd.Series(x).loc[pd.Series(x) <= pd.Series(x).quantile(1 - alpha)].mean(), raw=True
         )
+
 
         # Cálculo de ES Normal
         var_es_rolling_df[col_ES_norm] = rolling_mean - rolling_std * (norm.pdf(norm.ppf(1 - alpha)) / (1 - alpha))

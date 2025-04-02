@@ -154,25 +154,27 @@ if stock_seleccionado:
     # Eliminamos filas con valores NaN generados por la ventana móvil
     var_es_rolling_df.dropna(inplace=True)
 
-    # Graficamos
-    plt.figure(figsize=(14, 7))
 
-    # Gráfica de rendimientos diarios (convertidos a porcentaje)
-    plt.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Retornos Diarios (%)', color='blue', alpha=0.5)
+    with st.spinner("Descargando datos..."):
+        # Graficamos
+        plt.figure(figsize=(14, 7))
 
-    # Graficamos el VaR al 95% rolling
-    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Historico'], label='95% Historico VaR', color='red', linestyle='dashed')
-    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Normal'], label='95% Normal VaR', color='red')
+        # Gráfica de rendimientos diarios (convertidos a porcentaje)
+        plt.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Retornos Diarios (%)', color='blue', alpha=0.5)
 
-    # Graficamos el ES al 95% rolling
-    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Historico'], label='95% Historico ES', color='purple', linestyle='dashed')
-    plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Normal'], label='95% Normal ES', color='purple')
+        # Graficamos el VaR al 95% rolling
+        plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Historico'], label='95% Historico VaR', color='red', linestyle='dashed')
+        plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% VaR Normal'], label='95% Normal VaR', color='red')
 
-    # Agregar título y etiquetas
-    plt.title('Retornos Diarios, VaR, and ES (95%) Rolling')
-    plt.xlabel('Fecha')
-    plt.ylabel('Cofianza (%)')
+        # Graficamos el ES al 95% rolling
+        plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Historico'], label='95% Historico ES', color='purple', linestyle='dashed')
+        plt.plot(var_es_rolling_df.index, var_es_rolling_df['95% ES Normal'], label='95% Normal ES', color='purple')
 
-    # Mostrar leyenda
-    plt.legend()
-    plt.show()
+        # Agregar título y etiquetas
+        plt.title('Retornos Diarios, VaR, and ES (95%) Rolling')
+        plt.xlabel('Fecha')
+        plt.ylabel('Cofianza (%)')
+
+        # Mostrar leyenda
+        plt.legend()
+        plt.show()

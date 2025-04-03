@@ -369,6 +369,3 @@ if stock_seleccionado:
     ax.set_ylabel('Values (%)')
     ax.legend()
     st.pyplot(fig)
-
-    print(VaR_Vol_Mov_rolling_df_95)
-    print(VaRN_rolling_df_95)

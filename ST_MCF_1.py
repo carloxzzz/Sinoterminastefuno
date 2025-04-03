@@ -258,7 +258,6 @@ if stock_seleccionado:
 
     # Graficamos los resultados de VaR y ES con Rolling Window al 95%
 
-
     # Preparar datos combinados
     df_var = pd.concat([
         VaRN_rolling_df_95.rename(columns={'0.95% VaRN Rolling': 'value'}).assign(Metrica='0.95% VaRN Rolling'),

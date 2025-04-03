@@ -295,7 +295,7 @@ if stock_seleccionado:
         )),
         tooltip=[
             alt.Tooltip('Date', title='Fecha'),
-            alt.Tooltip('value', title='VaR', format='.2f'),
+            alt.Tooltip('value', title='VaR', format='%',),
             alt.Tooltip('Metrica', title='Métrica')
         ]
     )
@@ -329,19 +329,6 @@ if stock_seleccionado:
         ESH_rolling_df_99.rename(columns={'0.99% ESH Rolling': 'value'}).assign(Metrica='0.99% ESH Rolling')
     ]).reset_index()
 
-    # Convertir a porcentaje
-    df_rendimientos_plot = df_rendimientos.reset_index()
-
-    # Crear la gráfica base
-    base = alt.Chart(df_rendimientos_plot).mark_line(
-        color='white',
-        opacity=0.5,
-    ).encode(
-        x=alt.X('Date', title='Fecha'),
-        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')
-    ))
-
-
     # Capa de ES
     es_layer = alt.Chart(df_es.dropna()).mark_line(
         strokeWidth=2
@@ -354,7 +341,7 @@ if stock_seleccionado:
         )),
         tooltip=[
             alt.Tooltip('Date', title='Fecha'),
-            alt.Tooltip('value', title='ES', format='.2f'),
+            alt.Tooltip('value', title='ES', format='%'),
             alt.Tooltip('Metrica', title='Métrica')
         ]
     ).properties(

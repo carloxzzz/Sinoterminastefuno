@@ -138,7 +138,7 @@ if stock_seleccionado:
 
     st.subheader("Gráfico de Rendimientos Diarios") #oliwis :)
 
-    chart = alt.Chart(df_rendimientos[stock_seleccionado].reset_index()).mark_line(color='blue', opacity=0.5).encode(
+    chart = alt.Chart(df_rendimientos[stock_seleccionado].reset_index()).mark_line(color='white', opacity=0.5).encode(
         x=alt.X('Date', title='Fecha'),
         y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')),
         tooltip=[alt.Tooltip('Fecha:T', title='Fecha'), 

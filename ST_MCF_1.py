@@ -267,7 +267,6 @@ if stock_seleccionado:
     ]).reset_index()
 
     # Convertir a porcentaje y limpiar datos
-    df_var['value'] = df_var['value'] * 100
     df_var = df_var.dropna()
 
     # Dataframe de rendimientos (convertir índice a columna 'Date')
@@ -331,7 +330,6 @@ if stock_seleccionado:
     ]).reset_index()
 
     # Convertir a porcentaje
-    df_es['value'] = df_es['value'] * 100
     df_rendimientos_plot = df_rendimientos.reset_index()
 
     # Crear la gráfica base

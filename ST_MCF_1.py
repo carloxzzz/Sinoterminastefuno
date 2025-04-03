@@ -177,8 +177,8 @@ if stock_seleccionado:
     
     fig, ax = plt.subplots(figsize=(12, 6))
     ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Daily Returns (%)', color='blue', alpha=0.5)
-    ax.plot(VaRN_rolling_df_95.index, VaRN_rolling_df_95['95% VaR Rolling'], label='95% Rolling VaR', color='red')
-    ax.set_title('Daily Returns and 95% Rolling VaR')
+    ax.plot(VaRN_rolling_df_95.index, VaRN_rolling_df_95['0.95% VaR Rolling'], label='0.95% VaR Rolling', color='red')
+    ax.set_title('Daily Returns and 0.95% VaR Rolling')
     ax.set_xlabel('Date')
     ax.set_ylabel('Values (%)')
     ax.legend()

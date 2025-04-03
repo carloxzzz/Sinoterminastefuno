@@ -302,17 +302,20 @@ if stock_seleccionado:
 
     # Combinar y personalizar
     chart = (base + var_layer).properties(
-        title=f'VaR Rolling vs Rendimientos Diarios - {stock_seleccionado}',
+        title=f'VaR con Volatilidad Móvil - {stock_seleccionado}',
         width=800,
         height=400
     ).configure_legend(
         title=None,
         orient='bottom',
         labelFontSize=12,
-        symbolStrokeWidth=5
+        symbolStrokeWidth=6,
+        padding=10
     ).configure_axis(
         labelFontSize=12,
         titleFontSize=14
+    ).configure_view(
+        strokeWidth=0
     ).interactive()
 
     st.altair_chart(chart, use_container_width=True)
@@ -351,15 +354,20 @@ if stock_seleccionado:
 
     # Combinar las capas
     chart = (base + es_layer).properties(
-        title=f'ES Rolling vs Rendimientos Diarios - {stock_seleccionado}'
+        title=f'VaR con Volatilidad Móvil - {stock_seleccionado}',
+        width=800,
+        height=400
     ).configure_legend(
-        titleFontSize=14,
-        labelFontSize=12,
+        title=None,
         orient='bottom',
-        title=None
+        labelFontSize=12,
+        symbolStrokeWidth=6,
+        padding=10
     ).configure_axis(
         labelFontSize=12,
         titleFontSize=14
+    ).configure_view(
+        strokeWidth=0
     ).interactive()
 
     st.altair_chart(chart, use_container_width=True)
@@ -434,7 +442,7 @@ if stock_seleccionado:
         )),
         tooltip=[
             alt.Tooltip('Date', title='Fecha', format='%Y-%m-%d'),
-            alt.Tooltip('Valor', title='VaR', format='.2f'),
+            alt.Tooltip('Valor', title='VaR', format='%'),
             alt.Tooltip('Métrica', title='Nivel de Confianza')
         ]
     )

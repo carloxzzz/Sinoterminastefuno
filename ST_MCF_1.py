@@ -259,18 +259,67 @@ if stock_seleccionado:
     # Graficamos los resultados de VaR y ES con Rolling Window al 95%
 
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Retornos Diarios (%)', color='blue', alpha=0.5)
-    ax.plot(VaRN_rolling_df_95.index, VaRN_rolling_df_95['0.95% VaRN Rolling'] *100, label='0.95% VaRN Rolling', color='green')
-    ax.plot(VaRH_rolling_df_95.index, VaRH_rolling_df_95['0.95% VaRH Rolling'] *100, label='0.95% VaRH Rolling', color='red')
-    ax.plot(VaRN_rolling_df_99.index, VaRN_rolling_df_99['0.99% VaRN Rolling'] *100, label='0.99% VaRN Rolling', color='blue')
-    ax.plot(VaRH_rolling_df_99.index, VaRH_rolling_df_99['0.99% VaRH Rolling'] *100, label='0.99% VaRH Rolling', color='orange')
-    ax.set_title('Retornos diaros, 0.95% VaR Rolling y 0.95% ESN Rolling')
-    ax.set_xlabel('fehca')
-    ax.set_ylabel('procentaje (%)')
-    ax.legend()
-    st.pyplot(fig)
+    # Preparar datos combinados
+    df_var = pd.concat([
+        VaRN_rolling_df_95.rename(columns={'0.95% VaRN Rolling': 'value'}).assign(Metrica='0.95% VaRN Rolling'),
+        VaRH_rolling_df_95.rename(columns={'0.95% VaRH Rolling': 'value'}).assign(Metrica='0.95% VaRH Rolling'),
+        VaRN_rolling_df_99.rename(columns={'0.99% VaRN Rolling': 'value'}).assign(Metrica='0.99% VaRN Rolling'),
+        VaRH_rolling_df_99.rename(columns={'0.99% VaRH Rolling': 'value'}).assign(Metrica='0.99% VaRH Rolling')
+    ]).reset_index()
 
+    # Convertir a porcentaje y limpiar datos
+    df_var['value'] = df_var['value'] * 100
+    df_var = df_var.dropna()
+
+    # Dataframe de rendimientos (convertir índice a columna 'Date')
+    df_rend_plot = df_rendimientos.reset_index().rename(columns={'index': 'Date'})
+    df_rend_plot[stock_seleccionado] = df_rend_plot[stock_seleccionado] * 100
+
+    # Crear gráfica base
+    base = alt.Chart(df_rend_plot).mark_line(
+        color='blue',
+        opacity=0.3,
+        strokeWidth=1
+    ).encode(
+        x=alt.X('Date', title='Fecha', axis=alt.Axis(format='%Y')),
+        y=alt.Y(f'{stock_seleccionado}', title='Rendimiento (%)'),
+        tooltip=[alt.Tooltip('Date', title='Fecha'), 
+                alt.Tooltip(f'{stock_seleccionado}', format='.2f', title='Rendimiento')]
+    )
+
+    # Capa de VaR
+    var_layer = alt.Chart(df_var).mark_line(
+        strokeWidth=2
+    ).encode(
+        x='Date',
+        y=alt.Y('value', title='VaR (%)'),
+        color=alt.Color('Metrica', scale=alt.Scale(
+            domain=['0.95% VaRN Rolling', '0.95% VaRH Rolling', '0.99% VaRN Rolling', '0.99% VaRH Rolling'],
+            range=['#4daf4a', '#e41a1c', '#377eb8', '#ff7f00']  # Verde, Rojo, Azul, Naranja
+        )),
+        tooltip=[
+            alt.Tooltip('Date', title='Fecha'),
+            alt.Tooltip('value', title='VaR', format='.2f'),
+            alt.Tooltip('Metrica', title='Métrica')
+        ]
+    )
+
+    # Combinar y personalizar
+    chart = (base + var_layer).properties(
+        title=f'VaR Rolling vs Rendimientos Diarios - {stock_seleccionado}',
+        width=800,
+        height=400
+    ).configure_legend(
+        title=None,
+        orient='bottom',
+        labelFontSize=12,
+        symbolStrokeWidth=5
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).interactive()
+
+    st.altair_chart(chart, use_container_width=True)
 
 #inga tu roña mira q grafica tan bonita pensar q me tomo 3 dias hacerla y entender pq daba error me tomo solo mi salud mental
 

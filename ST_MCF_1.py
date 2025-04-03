@@ -280,7 +280,7 @@ if stock_seleccionado:
         opacity=0.5,
     ).encode(
         x=alt.X('Date', title='Fecha'),
-        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')
+        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%')
     ))
 
     # Capa de VaR

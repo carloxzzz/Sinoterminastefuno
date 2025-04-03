@@ -171,7 +171,7 @@ if stock_seleccionado:
     ESH_R_99 = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaRH_R_99].mean()
     ESH_rolling_df_99 = pd.DataFrame({'Date': df_rendimientos.index, '0.99% ESN Rolling': ESH_R_99}).set_index('Date')
 
-    print(ESH_rolling_df_95)
+    print(VaRN_rolling_df_95)
 
 
     

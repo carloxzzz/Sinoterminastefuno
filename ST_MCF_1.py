@@ -355,6 +355,5 @@ if stock_seleccionado:
 
     resultados_var2 = calcular_violaciones_var(df_rendimientos, stock_seleccionado, var_dict2)
 
-
     for metodo, (violaciones, porcentaje) in resultados_var2.items():
         st.text(f"{metodo}: {violaciones} violaciones ({porcentaje:.2f}%)")

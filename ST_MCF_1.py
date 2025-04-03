@@ -129,7 +129,6 @@ if stock_seleccionado:
     skew = skew(df_rendimientos[stock_seleccionado])
     
 
-    
     col1, col2, col3= st.columns(3)
     col1.metric("Rendimiento Medio Diario", f"{rendimiento_medio:.4%}")
     col2.metric("Kurtosis", f"{Kurtosis:.4}")
@@ -139,7 +138,7 @@ if stock_seleccionado:
 
     st.subheader("Gráfico de Rendimientos Diarios") #oliwis :)
 
-    chart = alt.Chart(df_rendimientos.reset_index()).mark_line(color='blue', opacity=0.5).encode(
+    chart = alt.Chart(df_rendimientos[stock_seleccionado].reset_index()).mark_line(color='blue', opacity=0.5).encode(
         x=alt.X('Fecha:T', title='Fecha'),
         y=alt.Y(f'{stock_seleccionado}:Q', axis=alt.Axis(format='%', title='Rendimiento (%)')),
         tooltip=[alt.Tooltip('Fecha:T', title='Fecha'), 

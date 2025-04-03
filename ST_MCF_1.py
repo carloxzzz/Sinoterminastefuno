@@ -139,8 +139,8 @@ if stock_seleccionado:
     st.subheader("Gráfico de Rendimientos Diarios") #oliwis :)
 
     chart = alt.Chart(df_rendimientos[stock_seleccionado].reset_index()).mark_line(color='blue', opacity=0.5).encode(
-        x=alt.X('Fecha:T', title='Fecha'),
-        y=alt.Y(f'{stock_seleccionado}:Q', axis=alt.Axis(format='%', title='Rendimiento (%)')),
+        x=alt.X('Date', title='Fecha'),
+        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')),
         tooltip=[alt.Tooltip('Fecha:T', title='Fecha'), 
              alt.Tooltip(f'{stock_seleccionado}:Q', format='.2%', title='Rendimiento')]
     ).properties(
@@ -356,3 +356,5 @@ if stock_seleccionado:
 
     for metodo, (violaciones, porcentaje) in resultados_var2.items():
         st.text(f"{metodo}: {violaciones} violaciones ({porcentaje:.2f}%)")
+
+    print(df_rendimientos)

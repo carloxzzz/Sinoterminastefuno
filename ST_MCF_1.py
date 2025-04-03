@@ -276,17 +276,63 @@ if stock_seleccionado:
 
     st.text("Acontinuacion onbservaremos los resultados del ES parametrico (Normal) como tambien el historico al 99% y al 95%")
     
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Retornos Diarios (%)', color='blue', alpha=0.5)
-    ax.plot(ESN_rolling_df_95.index, ESN_rolling_df_95['0.95% ESN Rolling'] *100, label='0.95% ESN Rolling', color='green')
-    ax.plot(ESH_rolling_df_95.index, ESH_rolling_df_95['0.95% ESH Rolling'] *100, label='0.95% ESH Rolling', color='red')
-    ax.plot(ESN_rolling_df_99.index, ESN_rolling_df_99['0.99% ESN Rolling'] *100, label='0.99% ESN Rolling', color='blue')
-    ax.plot(ESH_rolling_df_99.index, ESH_rolling_df_99['0.99% ESH Rolling'] *100, label='0.99% ESH Rolling', color='orange')
-    ax.set_title('Retornos diaros, 0.95% VaR Rolling y 0.95% ESN Rolling')
-    ax.set_xlabel('fecha')
-    ax.set_ylabel('porcentajes (%)')
-    ax.legend()
-    st.pyplot(fig)
+    # Preparar los datos combinados
+    df_es = pd.concat([
+        ESN_rolling_df_95.rename(columns={'0.95% ESN Rolling': 'value'}).assign(Metrica='0.95% ESN Rolling'),
+        ESH_rolling_df_95.rename(columns={'0.95% ESH Rolling': 'value'}).assign(Metrica='0.95% ESH Rolling'),
+        ESN_rolling_df_99.rename(columns={'0.99% ESN Rolling': 'value'}).assign(Metrica='0.99% ESN Rolling'),
+        ESH_rolling_df_99.rename(columns={'0.99% ESH Rolling': 'value'}).assign(Metrica='0.99% ESH Rolling')
+    ]).reset_index()
+
+    # Convertir a porcentaje
+    df_es['value'] = df_es['value'] * 100
+    df_rendimientos_plot = df_rendimientos.reset_index()
+    df_rendimientos_plot[stock_seleccionado] = df_rendimientos_plot[stock_seleccionado] * 100
+
+    # Crear la gráfica base
+    base = alt.Chart(df_rendimientos_plot).mark_line(
+        color='blue',
+        opacity=0.3,
+        strokeWidth=1
+    ).encode(
+        x=alt.X('Fecha:T', title='Fecha', axis=alt.Axis(format='%Y')),
+        y=alt.Y(f'{stock_seleccionado}:Q', title='Rendimiento (%)')
+    )
+
+    # Capa de ES
+    es_layer = alt.Chart(df_es.dropna()).mark_line(
+        strokeWidth=2
+    ).encode(
+        x='Fecha:T',
+        y=alt.Y('value:Q', title='ES (%)'),
+        color=alt.Color('Metrica:N', scale=alt.Scale(
+            domain=['0.95% ESN Rolling', '0.95% ESH Rolling', '0.99% ESN Rolling', '0.99% ESH Rolling'],
+            range=['#4daf4a', '#e41a1c', '#377eb8', '#ff7f00']  # Verde, Rojo, Azul, Naranja
+        )),
+        tooltip=[
+            alt.Tooltip('Fecha:T', title='Fecha'),
+            alt.Tooltip('value:Q', title='ES', format='.2f'),
+            alt.Tooltip('Metrica:N', title='Métrica')
+        ]
+    ).properties(
+        width=800,
+        height=400
+    )
+
+    # Combinar las capas
+    chart = (base + es_layer).properties(
+        title=f'ES Rolling vs Rendimientos Diarios - {stock_seleccionado}'
+    ).configure_legend(
+        titleFontSize=14,
+        labelFontSize=12,
+        orient='bottom',
+        title=None
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).interactive()
+
+    st.altair_chart(chart, use_container_width=True)
 
 
     #################################################################### vtl aqui casi me cago

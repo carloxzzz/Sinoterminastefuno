@@ -141,8 +141,8 @@ if stock_seleccionado:
     chart = alt.Chart(df_rendimientos[stock_seleccionado].reset_index()).mark_line(color='white', opacity=0.5).encode(
         x=alt.X('Date', title='Fecha'),
         y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')),
-        tooltip=[alt.Tooltip('Fecha:T', title='Fecha'), 
-             alt.Tooltip(f'{stock_seleccionado}:Q', format='.2%', title='Rendimiento')]
+        tooltip=[alt.Tooltip('Date', title='Fecha'), 
+             alt.Tooltip(f'{stock_seleccionado}', format='.2%', title='Rendimiento')]
     ).properties(
         width=800,
         height=400,

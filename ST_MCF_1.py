@@ -292,12 +292,11 @@ if stock_seleccionado:
     # Crear la gráfica base
     base = alt.Chart(df_rendimientos_plot).mark_line(
         color='white',
-        opacity=0.3,
-        strokeWidth=1
+        opacity=0.5,
     ).encode(
-        x=alt.X('Date', title='Fecha', axis=alt.Axis(format='%Y')),
-        y=alt.Y(f'{stock_seleccionado}', title='Rendimiento (%)')
-    )
+        x=alt.X('Date', title='Fecha'),
+        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')
+    ))
 
     # Capa de ES
     es_layer = alt.Chart(df_es.dropna()).mark_line(

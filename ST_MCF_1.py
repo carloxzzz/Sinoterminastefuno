@@ -271,18 +271,17 @@ if stock_seleccionado:
 
     # Dataframe de rendimientos (convertir índice a columna 'Date')
     df_rend_plot = df_rendimientos.reset_index().rename(columns={'index': 'Date'})
+    # Convertir a porcentaje
     df_rendimientos_plot = df_rendimientos.reset_index()
 
-    # Crear gráfica base
-    base = alt.Chart(df_rend_plot).mark_line(
+    # Crear la gráfica base
+    base = alt.Chart(df_rendimientos_plot).mark_line(
         color='white',
         opacity=0.5,
     ).encode(
         x=alt.X('Date', title='Fecha'),
-        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')),
-        tooltip=[alt.Tooltip('Date', title='Fecha'), 
-                alt.Tooltip(f'{stock_seleccionado}', format='.2f', title='Rendimiento')]
-    )
+        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')
+    ))
 
     # Capa de VaR
     var_layer = alt.Chart(df_var).mark_line(
@@ -329,6 +328,19 @@ if stock_seleccionado:
         ESN_rolling_df_99.rename(columns={'0.99% ESN Rolling': 'value'}).assign(Metrica='0.99% ESN Rolling'),
         ESH_rolling_df_99.rename(columns={'0.99% ESH Rolling': 'value'}).assign(Metrica='0.99% ESH Rolling')
     ]).reset_index()
+
+    # Convertir a porcentaje
+    df_rendimientos_plot = df_rendimientos.reset_index()
+
+    # Crear la gráfica base
+    base = alt.Chart(df_rendimientos_plot).mark_line(
+        color='white',
+        opacity=0.5,
+    ).encode(
+        x=alt.X('Date', title='Fecha'),
+        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')
+    ))
+
 
     # Capa de ES
     es_layer = alt.Chart(df_es.dropna()).mark_line(

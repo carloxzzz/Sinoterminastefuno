@@ -280,7 +280,7 @@ if stock_seleccionado:
         opacity=0.5,
     ).encode(
         x=alt.X('Date', title='Fecha'),
-        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%')
+        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')
     ))
 
     # Capa de VaR
@@ -409,16 +409,55 @@ if stock_seleccionado:
         'VaR_vol_99': VaR_vol_99
     }).set_index('Date')
 
-    # Graficar odio odio odio
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Retornos Diarios (%)', color='blue', alpha=0.5)
-    ax.plot(VaR_vol_df.index, VaR_vol_df['VaR_vol_95'] * 100, label='VaR 95% (Vol Movil)', color='green')
-    ax.plot(VaR_vol_df.index, VaR_vol_df['VaR_vol_99'] * 100, label='VaR 99% (Vol Movil)', color='red')
-    ax.set_title(f'VaR con Volatilidad Móvil para {stock_seleccionado}')
-    ax.set_xlabel('Fecha')
-    ax.set_ylabel('VaR (%)')
-    ax.legend()
-    st.pyplot(fig)
+    # Preparar datos
+    df_rend_plot = df_rendimientos.reset_index().rename(columns={'index': 'Date'})
+
+    # Preparar datos de VaR
+    df_var_vol = VaR_vol_df.reset_index().melt(id_vars='Date', 
+                                            value_vars=['VaR_vol_95', 'VaR_vol_99'],
+                                            var_name='Métrica', 
+                                            value_name='Valor')
+    df_var_vol['Métrica'] = df_var_vol['Métrica'].replace({
+        'VaR_vol_95': 'VaR 95% (Vol Móvil)',
+        'VaR_vol_99': 'VaR 99% (Vol Móvil)'
+    })
+
+    # Capa de VaR
+    var_layer = alt.Chart(df_var_vol.dropna()).mark_line(
+        strokeWidth=2
+    ).encode(
+        x='Date',
+        y=alt.Y('Valor', title='VaR (%)'),
+        color=alt.Color('Métrica', scale=alt.Scale(
+            domain=['VaR 95% (Vol Móvil)', 'VaR 99% (Vol Móvil)'],
+            range=['#2ca02c', '#d62728']  # Verde, Rojo
+        )),
+        tooltip=[
+            alt.Tooltip('Date', title='Fecha', format='%Y-%m-%d'),
+            alt.Tooltip('Valor', title='VaR', format='.2f'),
+            alt.Tooltip('Métrica', title='Nivel de Confianza')
+        ]
+    )
+
+    # Combinar y personalizar
+    chart = (base + var_layer).properties(
+        title=f'VaR con Volatilidad Móvil - {stock_seleccionado}',
+        width=800,
+        height=400
+    ).configure_legend(
+        title=None,
+        orient='bottom',
+        labelFontSize=12,
+        symbolStrokeWidth=6,
+        padding=10
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_view(
+        strokeWidth=0
+    ).interactive()
+
+    st.altair_chart(chart, use_container_width=True)
 
     #Ya solo faltan las violaciones pero la neta q flojera, si las voy a hacer pero la neta q coraje me quurisad colgar d lis guevoosssssssssss
 

@@ -186,3 +186,21 @@ if stock_seleccionado:
     ax.set_ylabel('Values (%)')
     ax.legend()
     st.pyplot(fig)
+
+    st.subheader("Cálculo de VaR con volatilidad movil y asumiendo normalidad")
+
+    VaR_Vol_Mov_95 = rolling_std*stats.norm.ppf(1 - alphas[0])
+    VaR_Vol_Mov_rolling_df_95 = pd.DataFrame({'Date': df_rendimientos.index, '0.95% VaR Volatilidad Movil': VaR_Vol_Mov_95}).set_index('Date')
+
+    VaR_Vol_Mov_99 = rolling_std*stats.norm.ppf(1 - alphas[2])
+    VaR_Vol_Mov_rolling_df_99 = pd.DataFrame({'Date': df_rendimientos.index, '0.99% VaR Volatilidad Movil': VaR_Vol_Mov_99}).set_index('Date')
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Daily Returns (%)', color='blue', alpha=0.5)
+    ax.plot(VaR_Vol_Mov_rolling_df_95.index, VaR_Vol_Mov_rolling_df_95['0.95% VaR Volatilidad Movil'] * 100, label='0.95% VaR Volatilidad Movil', color='red')
+    ax.plot(VaR_Vol_Mov_rolling_df_99.index, VaR_Vol_Mov_rolling_df_99['0.99% VaR Volatilidad Movil'] *100, label='0.99% VaR Volatilidad Movil', color='green')
+    ax.set_title('Retornos diaros, 0.95% VaR Volatilidad Movil y 0.99% VaR Volatilidad Movil')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Values (%)')
+    ax.legend()
+    st.pyplot(fig)

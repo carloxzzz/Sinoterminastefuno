@@ -272,7 +272,6 @@ if stock_seleccionado:
 
     # Dataframe de rendimientos (convertir índice a columna 'Date')
     df_rend_plot = df_rendimientos.reset_index().rename(columns={'index': 'Date'})
-    df_rend_plot[stock_seleccionado] = df_rend_plot[stock_seleccionado] * 100
 
     # Crear gráfica base
     base = alt.Chart(df_rend_plot).mark_line(
@@ -334,7 +333,6 @@ if stock_seleccionado:
     # Convertir a porcentaje
     df_es['value'] = df_es['value'] * 100
     df_rendimientos_plot = df_rendimientos.reset_index()
-    df_rendimientos_plot[stock_seleccionado] = df_rendimientos_plot[stock_seleccionado] * 100
 
     # Crear la gráfica base
     base = alt.Chart(df_rendimientos_plot).mark_line(

@@ -276,12 +276,11 @@ if stock_seleccionado:
 
     # Crear gráfica base
     base = alt.Chart(df_rend_plot).mark_line(
-        color='blue',
-        opacity=0.3,
-        strokeWidth=1
+        color='white',
+        opacity=0.5,
     ).encode(
-        x=alt.X('Date', title='Fecha', axis=alt.Axis(format='%Y')),
-        y=alt.Y(f'{stock_seleccionado}', title='Rendimiento (%)'),
+        x=alt.X('Date', title='Fecha'),
+        y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')),
         tooltip=[alt.Tooltip('Date', title='Fecha'), 
                 alt.Tooltip(f'{stock_seleccionado}', format='.2f', title='Rendimiento')]
     )

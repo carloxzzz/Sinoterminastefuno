@@ -298,6 +298,7 @@ if stock_seleccionado:
         y=alt.Y(f'{stock_seleccionado}', axis=alt.Axis(format='%', title='Rendimiento (%)')
     ))
 
+
     # Capa de ES
     es_layer = alt.Chart(df_es.dropna()).mark_line(
         strokeWidth=2

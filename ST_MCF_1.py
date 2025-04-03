@@ -295,24 +295,24 @@ if stock_seleccionado:
         opacity=0.3,
         strokeWidth=1
     ).encode(
-        x=alt.X('Fecha:T', title='Fecha', axis=alt.Axis(format='%Y')),
-        y=alt.Y(f'{stock_seleccionado}:Q', title='Rendimiento (%)')
+        x=alt.X('Date', title='Fecha', axis=alt.Axis(format='%Y')),
+        y=alt.Y(f'{stock_seleccionado}', title='Rendimiento (%)')
     )
 
     # Capa de ES
     es_layer = alt.Chart(df_es.dropna()).mark_line(
         strokeWidth=2
     ).encode(
-        x='Fecha:T',
-        y=alt.Y('value:Q', title='ES (%)'),
-        color=alt.Color('Metrica:N', scale=alt.Scale(
+        x='Date',
+        y=alt.Y('value', title='ES (%)'),
+        color=alt.Color('Metrica', scale=alt.Scale(
             domain=['0.95% ESN Rolling', '0.95% ESH Rolling', '0.99% ESN Rolling', '0.99% ESH Rolling'],
             range=['#4daf4a', '#e41a1c', '#377eb8', '#ff7f00']  # Verde, Rojo, Azul, Naranja
         )),
         tooltip=[
-            alt.Tooltip('Fecha:T', title='Fecha'),
-            alt.Tooltip('value:Q', title='ES', format='.2f'),
-            alt.Tooltip('Metrica:N', title='Métrica')
+            alt.Tooltip('Date', title='Fecha'),
+            alt.Tooltip('value', title='ES', format='.2f'),
+            alt.Tooltip('Metrica', title='Métrica')
         ]
     ).properties(
         width=800,
@@ -403,4 +403,4 @@ if stock_seleccionado:
     for metodo, (violaciones, porcentaje) in resultados_var2.items():
         st.text(f"{metodo}: {violaciones} violaciones ({porcentaje:.2f}%)")
 
-    print(df_rendimientos)
+    print(ESN_rolling_df_95)

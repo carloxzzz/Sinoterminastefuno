@@ -132,12 +132,34 @@ if stock_seleccionado:
 
     rolling_mean = df_rendimientos[stock_seleccionado].rolling(window).mean()
     rolling_std = df_rendimientos[stock_seleccionado].rolling(window).std()
-    VaR_95_rolling = norm.ppf(1-0.95, rolling_mean, rolling_std) * 100
-    vaR_rolling_df = pd.DataFrame({'Date': df_rendimientos.index, '95% VaR Rolling': VaR_95_rolling}).set_index('Date')
+
+    for alphas in alphas2:
+        #Calculamos el valor de VaR_R (Parametrico normal)
+        VaRN_R = norm.ppf(1-alpha, rolling_mean, rolling_std)
+        VaRN_rolling_df = pd.DataFrame({'Date': df_rendimientos.index, f'{alpha}% VaR Rolling': VaRN_R}).set_index('Date')
+
+        #Calculamos el valor para ESN_R (Parametrico)
+
+        ESN_R = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaRN_R].mean()
+        ESN_rolling_df = pd.DataFrame({'Date': df_rendimientos.index, f'{alpha}% ESN Rolling': ESN_R}).set_index('Date')
+
+        #Calculamos el valor para VaRH_R
+
+        VaRH_R = df_rendimientos[stock_seleccionado].rolling(window).quantile(1 - alpha)
+        VaRH_rolling_df = pd.DataFrame({'Date': df_rendimientos.index, f'{alpha}% VaR Rolling': VaRH_R}).set_index('Date')
+
+        #Calculamos el valor para ESH_R 
+
+        ESH_R = df_rendimientos[stock_seleccionado][df_rendimientos[stock_seleccionado] <= VaRH_R].mean()
+        ESH_rolling_df = pd.DataFrame({'Date': df_rendimientos.index, f'{alpha}% ESN Rolling': ESH_R}).set_index('Date')
+
+        print(ESH_rolling_df)
+
+
     
     fig, ax = plt.subplots(figsize=(12, 6))
     ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Daily Returns (%)', color='blue', alpha=0.5)
-    ax.plot(vaR_rolling_df.index, vaR_rolling_df['95% VaR Rolling'], label='95% Rolling VaR', color='red')
+    ax.plot(VaRN_rolling_df.index, VaRN_rolling_df['95% VaR Rolling'], label='95% Rolling VaR', color='red')
     ax.set_title('Daily Returns and 95% Rolling VaR')
     ax.set_xlabel('Date')
     ax.set_ylabel('Values (%)')

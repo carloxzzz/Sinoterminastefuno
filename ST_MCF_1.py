@@ -139,12 +139,19 @@ if stock_seleccionado:
 
     st.subheader("Gráfico de Rendimientos Diarios") #oliwis :)
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='rendimientos (%)', color='blue', alpha=0.5)
-    ax.set_xlabel('fecha')
-    ax.set_ylabel('porcentajes (%)')
-    ax.legend()
-    st.pyplot(fig)
+    chart = alt.Chart(df_rendimientos.reset_index()).mark_line(color='blue', opacity=0.5).encode(
+        x=alt.X('Fecha:T', title='Fecha'),
+        y=alt.Y(f'{stock_seleccionado}:Q', axis=alt.Axis(format='%', title='Rendimiento (%)')),
+        tooltip=[alt.Tooltip('Fecha:T', title='Fecha'), 
+             alt.Tooltip(f'{stock_seleccionado}:Q', format='.2%', title='Rendimiento')]
+    ).properties(
+        width=800,
+        height=400,
+        title=f'Rendimientos Diarios de {stock_seleccionado}'
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
 
     # Calcular rendimientos logarítmicos 
     #Aaaaaaaaaaaaaaaa pero queria que se viera bonito
@@ -351,21 +358,3 @@ if stock_seleccionado:
 
     for metodo, (violaciones, porcentaje) in resultados_var2.items():
         st.text(f"{metodo}: {violaciones} violaciones ({porcentaje:.2f}%)")
-
-    st.subheader("Cálculo de VaR con volatilidad movil y asumiendo normalidad")
-
-    VaR_Vol_Mov_95 = rolling_std*stats.norm.ppf(1 - alphas[0])
-    VaR_Vol_Mov_rolling_df_95 = pd.DataFrame({'Date': df_rendimientos.index, '0.95% VaR Volatilidad Movil': VaR_Vol_Mov_95}).set_index('Date')
-
-    VaR_Vol_Mov_99 = rolling_std*stats.norm.ppf(1 - alphas[2])
-    VaR_Vol_Mov_rolling_df_99 = pd.DataFrame({'Date': df_rendimientos.index, '0.99% VaR Volatilidad Movil': VaR_Vol_Mov_99}).set_index('Date')
-
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(df_rendimientos.index, df_rendimientos[stock_seleccionado] * 100, label='Daily Returns (%)', color='blue', alpha=0.5)
-    ax.plot(VaR_Vol_Mov_rolling_df_95.index, VaR_Vol_Mov_rolling_df_95['0.95% VaR Volatilidad Movil'] * 100, label='0.95% VaR Volatilidad Movil', color='red')
-    ax.plot(VaR_Vol_Mov_rolling_df_99.index, VaR_Vol_Mov_rolling_df_99['0.99% VaR Volatilidad Movil'] *100, label='0.99% VaR Volatilidad Movil', color='green')
-    ax.set_title('Retornos diaros, 0.95% VaR Volatilidad Movil y 0.99% VaR Volatilidad Movil')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Values (%)')
-    ax.legend()
-    st.pyplot(fig)

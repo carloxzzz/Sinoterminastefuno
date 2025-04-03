@@ -402,5 +402,3 @@ if stock_seleccionado:
 
     for metodo, (violaciones, porcentaje) in resultados_var2.items():
         st.text(f"{metodo}: {violaciones} violaciones ({porcentaje:.2f}%)")
-
-    print(ESN_rolling_df_95)

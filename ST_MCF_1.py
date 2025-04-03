@@ -291,7 +291,7 @@ if stock_seleccionado:
 
     # Crear la gráfica base
     base = alt.Chart(df_rendimientos_plot).mark_line(
-        color='blue',
+        color='white2',
         opacity=0.3,
         strokeWidth=1
     ).encode(
